@@ -11,6 +11,7 @@ describe("Android release workflow", () => {
     expect(workflow).toContain("on:");
     expect(workflow).toContain("tablet-v*");
     expect(workflow).toContain("contents: write");
+    expect(workflow).toContain("java-version: 21");
     expect(workflow).toContain("npm ci --include=optional");
     expect(workflow).toContain("npm test -- --run");
     expect(workflow).toContain("chmod +x android/gradlew");
