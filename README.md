@@ -46,6 +46,49 @@ npm test -- --run
 npm run build
 ```
 
+## Android 平板安装包
+
+项目已接入 Capacitor，可以打包成安卓平板可安装的 APK。
+
+```bash
+npm run android:build:debug
+```
+
+生成的 APK 路径：
+
+```text
+android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+将 APK 发送到安卓平板后，允许“安装未知来源应用”，再点击安装即可。这个 APK 面向餐厅内部使用，适合发布到 GitHub Release 作为平板点餐版本。
+
+常用同步命令：
+
+```bash
+npm run android:sync
+```
+
+当 Web 代码更新后，先执行同步命令，再重新构建 APK。
+
+## GitHub 自动发布 APK
+
+仓库已配置 GitHub Actions：推送 `tablet-v*` 标签时，会在 GitHub 云端自动构建 APK，并上传到 GitHub Release。
+
+发布新平板版本：
+
+```bash
+git tag tablet-v0.1.0
+git push origin tablet-v0.1.0
+```
+
+发布完成后，到 GitHub 仓库的 Releases 页面下载：
+
+```text
+checkFood-tablet-tablet-v0.1.0.apk
+```
+
+如果只想验证云端能否打包，也可以在 GitHub 的 Actions 页面手动运行 `Android APK Release`。手动运行只会生成 APK artifact，不会创建 Release。
+
 ## 常见问题
 
 如果启动时报错 `Cannot find module @rollup/rollup-darwin-arm64`，通常是 npm 可选依赖没有安装完整。可以重新执行：
@@ -55,3 +98,5 @@ npm install --include=optional --cache .npm-cache --registry https://registry.np
 ```
 
 如果安装时报 `EACCES` 并提示 `~/.npm` 权限问题，优先使用上面的 `--cache .npm-cache`，让 npm 缓存写入项目目录，避免使用当前用户没有权限的全局缓存目录。
+
+如果 Android 打包时报 JDK 或 Android SDK 相关错误，请安装 Android Studio，并确保本机配置了 JDK 17 或更高版本以及 Android SDK。

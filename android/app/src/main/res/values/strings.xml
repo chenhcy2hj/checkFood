@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">checkFood</string>
+    <string name="title_activity_main">checkFood</string>
+    <string name="package_name">com.chenhcy2hj.checkfood</string>
+    <string name="custom_url_scheme">com.chenhcy2hj.checkfood</string>
+</resources>
