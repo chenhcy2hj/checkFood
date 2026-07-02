@@ -8,7 +8,7 @@ function makeId(prefix: string): string {
 }
 
 function uniqueRemarks(remarks: string[]): string[] {
-  return Array.from(new Set(remarks.filter(Boolean)));
+  return Array.from(new Set(remarks.map((remark) => remark.trim()).filter(Boolean)));
 }
 
 function validateDishInput(input: DishInput): DishInput {
@@ -205,6 +205,25 @@ export function deleteDish(state: AppState, dishId: string): AppState {
   return {
     ...state,
     dishes: state.dishes.filter((dish) => dish.id !== dishId),
+  };
+}
+
+export function addRemark(state: AppState, remark: string): AppState {
+  const normalized = remark.trim();
+  if (!normalized || state.remarks.includes(normalized)) {
+    return state;
+  }
+
+  return {
+    ...state,
+    remarks: [...state.remarks, normalized],
+  };
+}
+
+export function deleteRemark(state: AppState, remark: string): AppState {
+  return {
+    ...state,
+    remarks: state.remarks.filter((item) => item !== remark),
   };
 }
 

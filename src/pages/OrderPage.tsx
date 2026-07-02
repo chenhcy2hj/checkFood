@@ -85,58 +85,88 @@ export function OrderPage({
 
       <div className="order-layout">
         <aside className="dish-pane">
-          <div className="pane-head">
-            <h2>菜品</h2>
-            <button className="button secondary" type="button" onClick={() => setState(createOrderGroup)}>
-              新建一组
-            </button>
+          <div className="dish-scroll">
+            <div className="pane-head">
+              <h2>菜品</h2>
+              <button className="button secondary" type="button" onClick={() => setState(createOrderGroup)}>
+                新建一组
+              </button>
+            </div>
+            {state.dishes.length === 0 ? (
+              <EmptyState title="暂无菜品" description="请到管理页新增菜品。" />
+            ) : (
+              CATEGORY_ORDER.map((category) => {
+                const dishes = state.dishes.filter((dish) => dish.category === category);
+                return (
+                  <section className="category-section" key={category}>
+                    <h3>
+                      <span>{CATEGORY_LABELS[category]}</span>
+                      <span>{dishes.length} 道</span>
+                    </h3>
+                    <div className="dish-grid">
+                      {dishes.map((dish) => (
+                        <button
+                          aria-label={`${dish.name} ${formatPrice(dish.price)}`}
+                          className="dish-button"
+                          key={dish.id}
+                          type="button"
+                          onClick={() => {
+                            setPendingItem(null);
+                            setPendingDish({ dish, remarks: [] });
+                          }}
+                        >
+                          <strong>{dish.name}</strong>
+                          <span>{formatPrice(dish.price)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+                );
+              })
+            )}
           </div>
-          {state.dishes.length === 0 ? (
-            <EmptyState title="暂无菜品" description="请到管理页新增菜品。" />
-          ) : (
-            CATEGORY_ORDER.map((category) => {
-              const dishes = state.dishes.filter((dish) => dish.category === category);
-              return (
-                <section className="category-section" key={category}>
-                  <h3>
-                    <span>{CATEGORY_LABELS[category]}</span>
-                    <span>{dishes.length} 道</span>
-                  </h3>
-                  <div className="dish-grid">
-                    {dishes.map((dish) => (
-                      <button
-                        aria-label={`${dish.name} ${formatPrice(dish.price)}`}
-                        className="dish-button"
-                        key={dish.id}
-                        type="button"
-                        onClick={() => setPendingDish({ dish, remarks: [] })}
-                      >
-                        <strong>{dish.name}</strong>
-                        <span>{formatPrice(dish.price)}</span>
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              );
-            })
-          )}
-          {pendingDish ? (
-            <RemarkPicker
-              title={`${pendingDish.dish.name}备注`}
-              selectedRemarks={pendingDish.remarks}
-              confirmText="确认添加"
-              onToggleRemark={(remark) =>
-                setPendingDish({
-                  ...pendingDish,
-                  remarks: pendingDish.remarks.includes(remark)
-                    ? pendingDish.remarks.filter((item) => item !== remark)
-                    : [...pendingDish.remarks, remark],
-                })
-              }
-              onConfirm={confirmDish}
-              onCancel={() => setPendingDish(null)}
-            />
-          ) : null}
+          <div className="dish-remark-dock">
+            {pendingDish ? (
+              <RemarkPicker
+                title={`${pendingDish.dish.name}备注`}
+                remarks={state.remarks}
+                selectedRemarks={pendingDish.remarks}
+                confirmText="确认添加"
+                onToggleRemark={(remark) =>
+                  setPendingDish({
+                    ...pendingDish,
+                    remarks: pendingDish.remarks.includes(remark)
+                      ? pendingDish.remarks.filter((item) => item !== remark)
+                      : [...pendingDish.remarks, remark],
+                  })
+                }
+                onConfirm={confirmDish}
+                onCancel={() => setPendingDish(null)}
+              />
+            ) : pendingItem ? (
+              <RemarkPicker
+                title={`${pendingItem.item.name}备注`}
+                remarks={state.remarks}
+                selectedRemarks={pendingItem.remarks}
+                confirmText="保存备注"
+                onToggleRemark={(remark) =>
+                  setPendingItem({
+                    ...pendingItem,
+                    remarks: pendingItem.remarks.includes(remark)
+                      ? pendingItem.remarks.filter((item) => item !== remark)
+                      : [...pendingItem.remarks, remark],
+                  })
+                }
+                onConfirm={confirmItemRemarks}
+                onCancel={() => setPendingItem(null)}
+              />
+            ) : (
+              <div className="remark-placeholder">
+                <strong>备注</strong>
+                <span>点击菜品后在这里选择备注并确认。</span>
+              </div>
+            )}
+          </div>
         </aside>
 
         <section className="groups-pane">
@@ -186,13 +216,14 @@ export function OrderPage({
                         <button
                           className="item-name-button"
                           type="button"
-                          onClick={() =>
+                          onClick={() => {
+                            setPendingDish(null);
                             setPendingItem({
                               groupId: group.id,
                               item,
                               remarks: [...item.remarks],
-                            })
-                          }
+                            });
+                          }}
                         >
                           {itemTitle(item)}
                         </button>
@@ -219,24 +250,6 @@ export function OrderPage({
           )}
         </section>
       </div>
-
-      {pendingItem ? (
-        <RemarkPicker
-          title={`${pendingItem.item.name}备注`}
-          selectedRemarks={pendingItem.remarks}
-          confirmText="保存备注"
-          onToggleRemark={(remark) =>
-            setPendingItem({
-              ...pendingItem,
-              remarks: pendingItem.remarks.includes(remark)
-                ? pendingItem.remarks.filter((item) => item !== remark)
-                : [...pendingItem.remarks, remark],
-            })
-          }
-          onConfirm={confirmItemRemarks}
-          onCancel={() => setPendingItem(null)}
-        />
-      ) : null}
     </section>
   );
 }

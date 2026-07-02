@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { CATEGORY_LABELS, CATEGORY_ORDER } from "../constants";
 import { ConfirmDialog } from "../components/ConfirmDialog";
-import { addDish, deleteDish, updateDish } from "../state";
+import { addDish, addRemark, deleteDish, deleteRemark, updateDish } from "../state";
 import type { AppState, Dish, DishCategory } from "../types";
 
 interface ManagePageProps {
@@ -29,6 +29,8 @@ export function ManagePage({ state, setState }: ManagePageProps) {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [remarkInput, setRemarkInput] = useState("");
+  const [remarkError, setRemarkError] = useState("");
   const [deletingDish, setDeletingDish] = useState<Dish | null>(null);
   const dishCount = state.dishes.length;
   const averagePrice = useMemo(() => {
@@ -67,6 +69,22 @@ export function ManagePage({ state, setState }: ManagePageProps) {
     setError("");
   };
 
+  const submitRemark = () => {
+    const normalized = remarkInput.trim();
+    if (!normalized) {
+      setRemarkError("备注不能为空");
+      return;
+    }
+    if (state.remarks.includes(normalized)) {
+      setRemarkError("备注已存在");
+      return;
+    }
+
+    setState((current) => addRemark(current, normalized));
+    setRemarkInput("");
+    setRemarkError("");
+  };
+
   return (
     <section className="page manage-page">
       <header className="topbar">
@@ -81,55 +99,87 @@ export function ManagePage({ state, setState }: ManagePageProps) {
       </header>
 
       <div className="manage-layout">
-        <aside className="form-card">
-          <h2>{editingId ? "编辑菜品" : "新增菜品"}</h2>
-          <label className="field">
-            <span>菜品名称</span>
-            <input
-              value={form.name}
-              onChange={(event) => setForm({ ...form, name: event.target.value })}
-            />
-          </label>
-          <label className="field">
-            <span>价格</span>
-            <input
-              inputMode="decimal"
-              value={form.price}
-              onChange={(event) => setForm({ ...form, price: event.target.value })}
-            />
-          </label>
-          <label className="field">
-            <span>分类</span>
-            <select
-              value={form.category}
-              onChange={(event) =>
-                setForm({ ...form, category: event.target.value as DishCategory })
-              }
-            >
-              {CATEGORY_ORDER.map((category) => (
-                <option key={category} value={category}>
-                  {CATEGORY_LABELS[category]}
-                </option>
+        <aside className="manage-side">
+          <section className="form-card">
+            <h2>{editingId ? "编辑菜品" : "新增菜品"}</h2>
+            <label className="field">
+              <span>菜品名称</span>
+              <input
+                value={form.name}
+                onChange={(event) => setForm({ ...form, name: event.target.value })}
+              />
+            </label>
+            <label className="field">
+              <span>价格</span>
+              <input
+                inputMode="decimal"
+                value={form.price}
+                onChange={(event) => setForm({ ...form, price: event.target.value })}
+              />
+            </label>
+            <label className="field">
+              <span>分类</span>
+              <select
+                value={form.category}
+                onChange={(event) =>
+                  setForm({ ...form, category: event.target.value as DishCategory })
+                }
+              >
+                {CATEGORY_ORDER.map((category) => (
+                  <option key={category} value={category}>
+                    {CATEGORY_LABELS[category]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {error ? <p className="form-error">{error}</p> : null}
+            <div className="form-actions">
+              <button className="button" type="button" onClick={submit}>
+                保存菜品
+              </button>
+              <button
+                className="button secondary"
+                type="button"
+                onClick={() => {
+                  setForm(emptyForm);
+                  setEditingId(null);
+                  setError("");
+                }}
+              >
+                清空
+              </button>
+            </div>
+          </section>
+
+          <section className="form-card remark-manage-card">
+            <h2>备注管理</h2>
+            <label className="field">
+              <span>新增备注</span>
+              <input
+                value={remarkInput}
+                onChange={(event) => setRemarkInput(event.target.value)}
+              />
+            </label>
+            {remarkError ? <p className="form-error">{remarkError}</p> : null}
+            <button className="button full" type="button" onClick={submitRemark}>
+              添加备注
+            </button>
+            <div className="manage-remark-list">
+              {state.remarks.map((remark) => (
+                <div className="manage-remark" key={remark}>
+                  <span>{remark}</span>
+                  <button
+                    aria-label={`删除备注 ${remark}`}
+                    className="mini-button danger"
+                    type="button"
+                    onClick={() => setState((current) => deleteRemark(current, remark))}
+                  >
+                    删除
+                  </button>
+                </div>
               ))}
-            </select>
-          </label>
-          {error ? <p className="form-error">{error}</p> : null}
-          <div className="form-actions">
-            <button className="button" type="button" onClick={submit}>
-              保存菜品
-            </button>
-            <button
-              className="button secondary"
-              type="button"
-              onClick={() => {
-                setForm(emptyForm);
-                setEditingId(null);
-                setError("");
-              }}
-            >
-              清空
-            </button>
-          </div>
+            </div>
+          </section>
         </aside>
 
         <section className="catalog">

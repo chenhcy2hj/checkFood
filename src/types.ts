@@ -27,6 +27,7 @@ export interface OrderGroup {
 
 export interface AppState {
   dishes: Dish[];
+  remarks: string[];
   orderGroups: OrderGroup[];
   activeGroupId: string | null;
 }

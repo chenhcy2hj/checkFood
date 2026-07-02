@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_REMARKS, createInitialState } from "./constants";
 import {
+  addRemark,
   addDish,
   addDishToActiveGroup,
   createOrderGroup,
   deleteDish,
   deleteGroup,
+  deleteRemark,
   getGrandTotal,
   getGroupTotal,
   setActiveGroup,
@@ -20,6 +22,7 @@ describe("ordering state", () => {
     const state = createInitialState();
 
     expect(state.dishes.length).toBeGreaterThanOrEqual(6);
+    expect(state.remarks).toEqual([...DEFAULT_REMARKS]);
     expect(state.orderGroups).toEqual([]);
     expect(state.activeGroupId).toBeNull();
     expect(DEFAULT_REMARKS).toEqual([
@@ -123,5 +126,19 @@ describe("ordering state", () => {
       name: "酸辣土豆丝",
       price: 18,
     });
+  });
+
+  it("adds and deletes available remarks without changing existing order rows", () => {
+    let state = createInitialState();
+    const dish = state.dishes[0];
+
+    state = addRemark(state, "微辣");
+    state = addRemark(state, "微辣");
+    state = addDishToActiveGroup(state, dish, ["微辣"]);
+    state = deleteRemark(state, "微辣");
+
+    expect(state.remarks).not.toContain("微辣");
+    expect(state.remarks.filter((remark) => remark === "微辣")).toHaveLength(0);
+    expect(state.orderGroups[0].items[0].remarks).toEqual(["微辣"]);
   });
 });

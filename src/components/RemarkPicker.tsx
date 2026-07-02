@@ -1,7 +1,6 @@
-import { DEFAULT_REMARKS } from "../constants";
-
 interface RemarkPickerProps {
   title: string;
+  remarks: string[];
   selectedRemarks: string[];
   confirmText: string;
   onToggleRemark: (remark: string) => void;
@@ -11,6 +10,7 @@ interface RemarkPickerProps {
 
 export function RemarkPicker({
   title,
+  remarks,
   selectedRemarks,
   confirmText,
   onToggleRemark,
@@ -26,7 +26,8 @@ export function RemarkPicker({
         </button>
       </div>
       <div className="remark-tags">
-        {DEFAULT_REMARKS.map((remark) => (
+        {remarks.length === 0 ? <span className="empty-inline">暂无备注</span> : null}
+        {remarks.map((remark) => (
           <button
             className={selectedRemarks.includes(remark) ? "remark-tag selected" : "remark-tag"}
             key={remark}

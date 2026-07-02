@@ -117,17 +117,32 @@ button:disabled {
 .dish-pane,
 .groups-pane {
   min-height: 0;
-  overflow: auto;
   padding: 22px;
 }
 
 .dish-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
   border-right: 1px solid var(--line);
   background: var(--surface-soft);
 }
 
 .groups-pane {
+  overflow: auto;
   background: #eef0ea;
+}
+
+.dish-scroll {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.dish-remark-dock {
+  flex: 0 0 auto;
 }
 
 .pane-head {
@@ -227,11 +242,27 @@ button:disabled {
 }
 
 .remark-picker {
-  margin-top: 18px;
   padding: 16px;
   border: 1px solid #d4e1e8;
   border-radius: 8px;
   background: #eef7fb;
+}
+
+.remark-placeholder {
+  display: flex;
+  min-height: 78px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px dashed #c8d7df;
+  border-radius: 8px;
+  background: #eef7fb;
+  color: var(--muted);
+}
+
+.remark-placeholder strong {
+  color: var(--ink);
 }
 
 .remark-head {
@@ -259,6 +290,11 @@ button:disabled {
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 12px;
+}
+
+.empty-inline {
+  color: var(--muted);
+  font-weight: 800;
 }
 
 .remark-tag {
@@ -424,10 +460,17 @@ button:disabled {
   overflow: hidden;
 }
 
+.manage-side,
 .form-card,
 .catalog {
   min-height: 0;
   overflow: auto;
+}
+
+.manage-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .form-card {
@@ -436,6 +479,10 @@ button:disabled {
   border-radius: 8px;
   background: var(--surface);
   box-shadow: var(--shadow);
+}
+
+.remark-manage-card {
+  flex: 1;
 }
 
 .form-card h2,
@@ -472,6 +519,29 @@ button:disabled {
 .form-error {
   color: var(--danger);
   font-weight: 800;
+}
+
+.manage-remark-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.manage-remark {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.manage-remark span {
+  font-weight: 900;
 }
 
 .catalog-grid {

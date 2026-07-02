@@ -1,4 +1,4 @@
-import { createInitialState } from "./constants";
+import { DEFAULT_REMARKS, createInitialState } from "./constants";
 import type { AppState, Dish, OrderGroup } from "./types";
 
 export const STORAGE_KEY = "check-food-state-v1";
@@ -53,6 +53,23 @@ function isAppState(value: unknown): value is AppState {
   return (
     Array.isArray(state.dishes) &&
     state.dishes.every(isDish) &&
+    Array.isArray(state.remarks) &&
+    state.remarks.every((remark) => typeof remark === "string") &&
+    Array.isArray(state.orderGroups) &&
+    state.orderGroups.every(isOrderGroup) &&
+    (typeof state.activeGroupId === "string" || state.activeGroupId === null)
+  );
+}
+
+function isLegacyAppState(value: unknown): value is Omit<AppState, "remarks"> {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const state = value as Omit<AppState, "remarks">;
+  return (
+    Array.isArray(state.dishes) &&
+    state.dishes.every(isDish) &&
     Array.isArray(state.orderGroups) &&
     state.orderGroups.every(isOrderGroup) &&
     (typeof state.activeGroupId === "string" || state.activeGroupId === null)
@@ -67,7 +84,16 @@ export function loadState(): AppState {
     }
 
     const parsed: unknown = JSON.parse(stored);
-    return isAppState(parsed) ? parsed : createInitialState();
+    if (isAppState(parsed)) {
+      return parsed;
+    }
+    if (isLegacyAppState(parsed)) {
+      return {
+        ...parsed,
+        remarks: [...DEFAULT_REMARKS],
+      };
+    }
+    return createInitialState();
   } catch {
     return createInitialState();
   }

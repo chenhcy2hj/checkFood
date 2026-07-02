@@ -47,4 +47,19 @@ describe("storage", () => {
     expect(state.dishes.length).toBeGreaterThanOrEqual(6);
     expect(state.activeGroupId).toBeNull();
   });
+
+  it("migrates old stored data without remarks", () => {
+    const state = createInitialState();
+    const oldState = {
+      dishes: state.dishes,
+      orderGroups: state.orderGroups,
+      activeGroupId: state.activeGroupId,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(oldState));
+
+    const loaded = loadState();
+
+    expect(loaded.remarks).toContain("少辣");
+    expect(loaded.dishes).toHaveLength(state.dishes.length);
+  });
 });

@@ -31,6 +31,7 @@ export const DEFAULT_DISHES: Dish[] = [
 export function createInitialState(): AppState {
   return {
     dishes: DEFAULT_DISHES.map((dish) => ({ ...dish })),
+    remarks: [...DEFAULT_REMARKS],
     orderGroups: [],
     activeGroupId: null,
   };
