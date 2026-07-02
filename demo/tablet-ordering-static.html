@@ -1,0 +1,1019 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>平板点餐静态展示</title>
+    <style>
+      :root {
+        --bg: #f4f5f2;
+        --surface: #ffffff;
+        --surface-soft: #f9faf7;
+        --line: #dfe3dc;
+        --ink: #1f2a24;
+        --muted: #66746b;
+        --accent: #2f6f9f;
+        --accent-soft: #e4f0f7;
+        --warm: #b45f38;
+        --warm-soft: #f7ebe5;
+        --done: #197a4a;
+        --done-soft: #dff2e8;
+        --danger: #b42318;
+        --danger-soft: #fae8e6;
+        --shadow: 0 16px 36px rgba(28, 38, 32, 0.1);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background: var(--bg);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+          "Microsoft YaHei", sans-serif;
+      }
+
+      .app {
+        display: grid;
+        grid-template-rows: 1fr 76px;
+        height: 100vh;
+        min-width: 960px;
+      }
+
+      .tab-toggle {
+        position: fixed;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .screen {
+        display: none;
+        min-height: 0;
+      }
+
+      #tab-order:checked ~ .viewport .order-screen,
+      #tab-manage:checked ~ .viewport .manage-screen {
+        display: block;
+      }
+
+      .viewport {
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 72px;
+        padding: 0 28px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.88);
+      }
+
+      .brand {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .brand-title {
+        font-size: 24px;
+        font-weight: 800;
+      }
+
+      .brand-subtitle {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .summary-strip {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .summary-pill {
+        min-width: 118px;
+        padding: 10px 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .summary-pill strong {
+        display: block;
+        font-size: 20px;
+        line-height: 1.2;
+      }
+
+      .summary-pill span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .order-layout {
+        display: grid;
+        grid-template-columns: minmax(380px, 45%) minmax(480px, 55%);
+        height: calc(100vh - 148px);
+        min-height: 0;
+      }
+
+      .dish-pane,
+      .orders-pane,
+      .manage-pane {
+        min-height: 0;
+        overflow: auto;
+        padding: 22px;
+      }
+
+      .dish-pane {
+        border-right: 1px solid var(--line);
+        background: var(--surface-soft);
+      }
+
+      .pane-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .pane-title {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 0 16px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        color: var(--surface);
+        background: var(--accent);
+        font-size: 15px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .button.secondary {
+        color: var(--accent);
+        border-color: #b9d6e8;
+        background: var(--accent-soft);
+      }
+
+      .button.warm {
+        color: var(--warm);
+        border-color: #edcab8;
+        background: var(--warm-soft);
+      }
+
+      .button.danger {
+        color: var(--danger);
+        border-color: #f0b8b2;
+        background: var(--danger-soft);
+      }
+
+      .category {
+        margin-bottom: 22px;
+      }
+
+      .category-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0 0 10px;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .dish-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .dish-card {
+        min-height: 92px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: 0 8px 18px rgba(31, 42, 36, 0.05);
+      }
+
+      .dish-card.active {
+        border-color: #8bbbd8;
+        background: var(--accent-soft);
+      }
+
+      .dish-name {
+        margin: 0 0 12px;
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .dish-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .price {
+        color: var(--warm);
+        font-size: 19px;
+        font-weight: 900;
+      }
+
+      .remark-panel {
+        margin-top: 18px;
+        padding: 16px;
+        border: 1px solid #d4e1e8;
+        border-radius: 8px;
+        background: #eef7fb;
+      }
+
+      .remark-panel h3 {
+        margin: 0 0 12px;
+        font-size: 17px;
+      }
+
+      .remark-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .tag {
+        min-height: 38px;
+        padding: 8px 12px;
+        border: 1px solid #cfd7ce;
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--ink);
+        font-weight: 700;
+      }
+
+      .tag.selected {
+        color: var(--accent);
+        border-color: #9ec8df;
+        background: #d9edf7;
+      }
+
+      .orders-pane {
+        background: #eef0ea;
+      }
+
+      .order-tools {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .group-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        padding-bottom: 22px;
+      }
+
+      .order-group {
+        display: flex;
+        flex-direction: column;
+        min-height: 318px;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .order-group.active {
+        border-color: var(--accent);
+      }
+
+      .group-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 16px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .group-title {
+        margin: 0 0 6px;
+        font-size: 20px;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 26px;
+        padding: 4px 9px;
+        border-radius: 8px;
+        color: var(--muted);
+        background: #eef0ea;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .status.submitted {
+        color: var(--accent);
+        background: var(--accent-soft);
+      }
+
+      .group-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .mini-button {
+        min-height: 34px;
+        padding: 0 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: var(--ink);
+        background: var(--surface-soft);
+        font-size: 13px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .mini-button.primary {
+        color: var(--accent);
+        border-color: #b9d6e8;
+        background: var(--accent-soft);
+      }
+
+      .mini-button.danger {
+        color: var(--danger);
+        border-color: #f0b8b2;
+        background: var(--danger-soft);
+      }
+
+      .items {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px;
+        min-height: 160px;
+      }
+
+      .order-item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+        min-height: 54px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface-soft);
+      }
+
+      .order-item.done {
+        border-color: #94d4b6;
+        background: var(--done-soft);
+      }
+
+      .item-name {
+        font-size: 16px;
+        font-weight: 800;
+      }
+
+      .item-note {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .item-side {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .done-mark {
+        min-width: 42px;
+        min-height: 30px;
+        padding: 4px 8px;
+        border-radius: 8px;
+        color: var(--done);
+        background: #c9ecd9;
+        font-size: 12px;
+        font-weight: 900;
+        text-align: center;
+      }
+
+      .group-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: auto;
+        padding: 14px 16px;
+        border-top: 1px solid var(--line);
+        background: #fbfcfa;
+      }
+
+      .subtotal-label {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .subtotal-value {
+        font-size: 24px;
+        font-weight: 900;
+        color: var(--warm);
+      }
+
+      .manage-screen {
+        background: var(--bg);
+      }
+
+      .manage-layout {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 18px;
+        height: calc(100vh - 148px);
+      }
+
+      .form-panel,
+      .catalog-panel {
+        min-height: 0;
+        overflow: auto;
+        padding: 22px;
+      }
+
+      .form-box {
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .form-box h2,
+      .catalog-panel h2 {
+        margin: 0 0 16px;
+        font-size: 20px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      .field label {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .input,
+      .select {
+        width: 100%;
+        min-height: 46px;
+        border: 1px solid #cbd2ca;
+        border-radius: 8px;
+        padding: 0 12px;
+        background: var(--surface-soft);
+        color: var(--ink);
+        font-size: 16px;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .catalog-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .catalog-column {
+        min-height: 340px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .catalog-column h3 {
+        margin: 0 0 12px;
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      .manage-dish {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+        min-height: 68px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface-soft);
+      }
+
+      .manage-dish + .manage-dish {
+        margin-top: 10px;
+      }
+
+      .manage-actions {
+        display: flex;
+        gap: 6px;
+      }
+
+      .bottom-nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        padding: 10px 18px;
+        border-top: 1px solid var(--line);
+        background: var(--surface);
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 56px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: var(--muted);
+        background: var(--surface-soft);
+        font-size: 18px;
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      #tab-order:checked ~ .bottom-nav label[for="tab-order"],
+      #tab-manage:checked ~ .bottom-nav label[for="tab-manage"] {
+        color: var(--surface);
+        border-color: var(--accent);
+        background: var(--accent);
+      }
+
+      @media (max-width: 1100px) {
+        .group-list {
+          grid-template-columns: 1fr;
+        }
+
+        .catalog-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <input class="tab-toggle" id="tab-order" name="tab" type="radio" checked />
+      <input class="tab-toggle" id="tab-manage" name="tab" type="radio" />
+
+      <section class="viewport">
+        <section class="screen order-screen">
+          <header class="topbar">
+            <div class="brand">
+              <div class="brand-title">平板点餐</div>
+              <div class="brand-subtitle">当前加菜目标：第 2 组</div>
+            </div>
+            <div class="summary-strip">
+              <div class="summary-pill">
+                <strong>3 组</strong>
+                <span>当前菜单</span>
+              </div>
+              <div class="summary-pill">
+                <strong>￥196</strong>
+                <span>全部合计</span>
+              </div>
+            </div>
+          </header>
+
+          <div class="order-layout">
+            <aside class="dish-pane">
+              <div class="pane-head">
+                <h1 class="pane-title">菜品</h1>
+                <button class="button secondary" type="button">新建一组</button>
+              </div>
+
+              <section class="category">
+                <h2 class="category-title">
+                  <span>热菜</span>
+                  <span>4 道</span>
+                </h2>
+                <div class="dish-grid">
+                  <article class="dish-card active">
+                    <h3 class="dish-name">鱼香肉丝</h3>
+                    <div class="dish-meta">
+                      <span>加入第 2 组</span>
+                      <span class="price">￥28</span>
+                    </div>
+                  </article>
+                  <article class="dish-card">
+                    <h3 class="dish-name">宫保鸡丁</h3>
+                    <div class="dish-meta">
+                      <span>点击点菜</span>
+                      <span class="price">￥32</span>
+                    </div>
+                  </article>
+                  <article class="dish-card">
+                    <h3 class="dish-name">回锅肉</h3>
+                    <div class="dish-meta">
+                      <span>点击点菜</span>
+                      <span class="price">￥36</span>
+                    </div>
+                  </article>
+                  <article class="dish-card">
+                    <h3 class="dish-name">番茄炒蛋</h3>
+                    <div class="dish-meta">
+                      <span>点击点菜</span>
+                      <span class="price">￥22</span>
+                    </div>
+                  </article>
+                </div>
+              </section>
+
+              <section class="category">
+                <h2 class="category-title">
+                  <span>凉菜</span>
+                  <span>2 道</span>
+                </h2>
+                <div class="dish-grid">
+                  <article class="dish-card">
+                    <h3 class="dish-name">凉拌黄瓜</h3>
+                    <div class="dish-meta">
+                      <span>点击点菜</span>
+                      <span class="price">￥12</span>
+                    </div>
+                  </article>
+                  <article class="dish-card">
+                    <h3 class="dish-name">口水鸡</h3>
+                    <div class="dish-meta">
+                      <span>点击点菜</span>
+                      <span class="price">￥26</span>
+                    </div>
+                  </article>
+                </div>
+              </section>
+
+              <section class="category">
+                <h2 class="category-title">
+                  <span>饮料</span>
+                  <span>2 道</span>
+                </h2>
+                <div class="dish-grid">
+                  <article class="dish-card">
+                    <h3 class="dish-name">可乐</h3>
+                    <div class="dish-meta">
+                      <span>点击点菜</span>
+                      <span class="price">￥5</span>
+                    </div>
+                  </article>
+                  <article class="dish-card">
+                    <h3 class="dish-name">雪碧</h3>
+                    <div class="dish-meta">
+                      <span>点击点菜</span>
+                      <span class="price">￥5</span>
+                    </div>
+                  </article>
+                </div>
+              </section>
+
+              <section class="remark-panel">
+                <h3>鱼香肉丝备注</h3>
+                <div class="remark-tags">
+                  <span class="tag selected">少辣</span>
+                  <span class="tag">不辣</span>
+                  <span class="tag">多辣</span>
+                  <span class="tag selected">不要香菜</span>
+                  <span class="tag">少盐</span>
+                  <span class="tag">打包</span>
+                </div>
+              </section>
+            </aside>
+
+            <section class="orders-pane">
+              <div class="order-tools">
+                <h1 class="pane-title">菜单</h1>
+                <button class="button" type="button">加入第 2 组</button>
+              </div>
+
+              <div class="group-list">
+                <article class="order-group">
+                  <div class="group-head">
+                    <div>
+                      <h2 class="group-title">第 1 组</h2>
+                      <span class="status submitted">已提交</span>
+                    </div>
+                    <div class="group-actions">
+                      <button class="mini-button primary" type="button">加菜</button>
+                      <button class="mini-button danger" type="button">删除</button>
+                    </div>
+                  </div>
+                  <div class="items">
+                    <div class="order-item done">
+                      <div>
+                        <span class="item-name">宫保鸡丁</span>
+                        <span class="item-note">不辣</span>
+                      </div>
+                      <div class="item-side">
+                        <span class="price">￥32</span>
+                        <span class="done-mark">完成</span>
+                      </div>
+                    </div>
+                    <div class="order-item">
+                      <div>
+                        <span class="item-name">凉拌黄瓜</span>
+                        <span class="item-note">少盐</span>
+                      </div>
+                      <div class="item-side">
+                        <span class="price">￥12</span>
+                        <button class="mini-button primary" type="button">完成</button>
+                      </div>
+                    </div>
+                    <div class="order-item">
+                      <div>
+                        <span class="item-name">可乐</span>
+                        <span class="item-note">无备注</span>
+                      </div>
+                      <div class="item-side">
+                        <span class="price">￥5</span>
+                        <button class="mini-button primary" type="button">完成</button>
+                      </div>
+                    </div>
+                  </div>
+                  <footer class="group-foot">
+                    <span class="subtotal-label">第 1 组小计</span>
+                    <span class="subtotal-value">￥49</span>
+                  </footer>
+                </article>
+
+                <article class="order-group active">
+                  <div class="group-head">
+                    <div>
+                      <h2 class="group-title">第 2 组</h2>
+                      <span class="status">点菜中</span>
+                    </div>
+                    <div class="group-actions">
+                      <button class="mini-button primary" type="button">加菜</button>
+                      <button class="mini-button primary" type="button">提交</button>
+                      <button class="mini-button danger" type="button">删除</button>
+                    </div>
+                  </div>
+                  <div class="items">
+                    <div class="order-item">
+                      <div>
+                        <span class="item-name">鱼香肉丝</span>
+                        <span class="item-note">少辣、不要香菜</span>
+                      </div>
+                      <div class="item-side">
+                        <span class="price">￥28</span>
+                        <button class="mini-button primary" type="button">完成</button>
+                      </div>
+                    </div>
+                    <div class="order-item">
+                      <div>
+                        <span class="item-name">鱼香肉丝</span>
+                        <span class="item-note">打包</span>
+                      </div>
+                      <div class="item-side">
+                        <span class="price">￥28</span>
+                        <button class="mini-button primary" type="button">完成</button>
+                      </div>
+                    </div>
+                    <div class="order-item">
+                      <div>
+                        <span class="item-name">回锅肉</span>
+                        <span class="item-note">多辣</span>
+                      </div>
+                      <div class="item-side">
+                        <span class="price">￥36</span>
+                        <button class="mini-button primary" type="button">完成</button>
+                      </div>
+                    </div>
+                  </div>
+                  <footer class="group-foot">
+                    <span class="subtotal-label">第 2 组小计</span>
+                    <span class="subtotal-value">￥92</span>
+                  </footer>
+                </article>
+
+                <article class="order-group">
+                  <div class="group-head">
+                    <div>
+                      <h2 class="group-title">第 3 组</h2>
+                      <span class="status submitted">已提交</span>
+                    </div>
+                    <div class="group-actions">
+                      <button class="mini-button primary" type="button">加菜</button>
+                      <button class="mini-button danger" type="button">删除</button>
+                    </div>
+                  </div>
+                  <div class="items">
+                    <div class="order-item done">
+                      <div>
+                        <span class="item-name">番茄炒蛋</span>
+                        <span class="item-note">无备注</span>
+                      </div>
+                      <div class="item-side">
+                        <span class="price">￥22</span>
+                        <span class="done-mark">完成</span>
+                      </div>
+                    </div>
+                    <div class="order-item">
+                      <div>
+                        <span class="item-name">口水鸡</span>
+                        <span class="item-note">少辣</span>
+                      </div>
+                      <div class="item-side">
+                        <span class="price">￥26</span>
+                        <button class="mini-button primary" type="button">完成</button>
+                      </div>
+                    </div>
+                    <div class="order-item">
+                      <div>
+                        <span class="item-name">雪碧</span>
+                        <span class="item-note">无备注</span>
+                      </div>
+                      <div class="item-side">
+                        <span class="price">￥5</span>
+                        <button class="mini-button primary" type="button">完成</button>
+                      </div>
+                    </div>
+                  </div>
+                  <footer class="group-foot">
+                    <span class="subtotal-label">第 3 组小计</span>
+                    <span class="subtotal-value">￥53</span>
+                  </footer>
+                </article>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="screen manage-screen">
+          <header class="topbar">
+            <div class="brand">
+              <div class="brand-title">菜品管理</div>
+              <div class="brand-subtitle">热菜、凉菜、饮料</div>
+            </div>
+            <div class="summary-strip">
+              <div class="summary-pill">
+                <strong>8 道</strong>
+                <span>当前菜品</span>
+              </div>
+              <div class="summary-pill">
+                <strong>￥21</strong>
+                <span>平均价格</span>
+              </div>
+            </div>
+          </header>
+
+          <div class="manage-layout">
+            <aside class="form-panel">
+              <form class="form-box">
+                <h2>新增菜品</h2>
+                <div class="field">
+                  <label for="dish-name">菜品名称</label>
+                  <input class="input" id="dish-name" value="酸辣土豆丝" />
+                </div>
+                <div class="field">
+                  <label for="dish-price">价格</label>
+                  <input class="input" id="dish-price" value="18" />
+                </div>
+                <div class="field">
+                  <label for="dish-category">分类</label>
+                  <select class="select" id="dish-category">
+                    <option>热菜</option>
+                    <option>凉菜</option>
+                    <option>饮料</option>
+                  </select>
+                </div>
+                <div class="form-actions">
+                  <button class="button" type="button">保存</button>
+                  <button class="button secondary" type="button">清空</button>
+                </div>
+              </form>
+            </aside>
+
+            <section class="catalog-panel">
+              <h2>菜品列表</h2>
+              <div class="catalog-grid">
+                <section class="catalog-column">
+                  <h3>热菜</h3>
+                  <article class="manage-dish">
+                    <div>
+                      <div class="item-name">鱼香肉丝</div>
+                      <span class="price">￥28</span>
+                    </div>
+                    <div class="manage-actions">
+                      <button class="mini-button primary" type="button">编辑</button>
+                      <button class="mini-button danger" type="button">删除</button>
+                    </div>
+                  </article>
+                  <article class="manage-dish">
+                    <div>
+                      <div class="item-name">宫保鸡丁</div>
+                      <span class="price">￥32</span>
+                    </div>
+                    <div class="manage-actions">
+                      <button class="mini-button primary" type="button">编辑</button>
+                      <button class="mini-button danger" type="button">删除</button>
+                    </div>
+                  </article>
+                  <article class="manage-dish">
+                    <div>
+                      <div class="item-name">回锅肉</div>
+                      <span class="price">￥36</span>
+                    </div>
+                    <div class="manage-actions">
+                      <button class="mini-button primary" type="button">编辑</button>
+                      <button class="mini-button danger" type="button">删除</button>
+                    </div>
+                  </article>
+                </section>
+
+                <section class="catalog-column">
+                  <h3>凉菜</h3>
+                  <article class="manage-dish">
+                    <div>
+                      <div class="item-name">凉拌黄瓜</div>
+                      <span class="price">￥12</span>
+                    </div>
+                    <div class="manage-actions">
+                      <button class="mini-button primary" type="button">编辑</button>
+                      <button class="mini-button danger" type="button">删除</button>
+                    </div>
+                  </article>
+                  <article class="manage-dish">
+                    <div>
+                      <div class="item-name">口水鸡</div>
+                      <span class="price">￥26</span>
+                    </div>
+                    <div class="manage-actions">
+                      <button class="mini-button primary" type="button">编辑</button>
+                      <button class="mini-button danger" type="button">删除</button>
+                    </div>
+                  </article>
+                </section>
+
+                <section class="catalog-column">
+                  <h3>饮料</h3>
+                  <article class="manage-dish">
+                    <div>
+                      <div class="item-name">可乐</div>
+                      <span class="price">￥5</span>
+                    </div>
+                    <div class="manage-actions">
+                      <button class="mini-button primary" type="button">编辑</button>
+                      <button class="mini-button danger" type="button">删除</button>
+                    </div>
+                  </article>
+                  <article class="manage-dish">
+                    <div>
+                      <div class="item-name">雪碧</div>
+                      <span class="price">￥5</span>
+                    </div>
+                    <div class="manage-actions">
+                      <button class="mini-button primary" type="button">编辑</button>
+                      <button class="mini-button danger" type="button">删除</button>
+                    </div>
+                  </article>
+                </section>
+              </div>
+            </section>
+          </div>
+        </section>
+      </section>
+
+      <nav class="bottom-nav" aria-label="底部导航">
+        <label class="nav-item" for="tab-order">点餐</label>
+        <label class="nav-item" for="tab-manage">管理</label>
+      </nav>
+    </main>
+  </body>
+</html>
