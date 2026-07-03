@@ -881,3 +881,121 @@ button:disabled {
     font-size: 16px;
   }
 }
+
+@media (orientation: landscape) and (max-width: 959px) {
+  .content-shell {
+    overflow: hidden;
+  }
+
+  .page,
+  .order-page,
+  .manage-page {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .topbar {
+    min-height: 0;
+    height: 64px;
+    align-items: center;
+    flex-wrap: nowrap;
+    padding: 8px 14px;
+  }
+
+  .topbar h1 {
+    font-size: 20px;
+  }
+
+  .topbar p {
+    margin-top: 3px;
+    font-size: 12px;
+  }
+
+  .summary {
+    width: auto;
+    min-width: 150px;
+    padding: 8px 10px;
+  }
+
+  .summary strong {
+    font-size: 17px;
+  }
+
+  .order-layout {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    grid-template-columns: minmax(280px, 42%) minmax(0, 58%);
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .dish-pane {
+    padding: 14px;
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+  }
+
+  .groups-pane {
+    min-height: 0;
+    padding: 14px;
+  }
+
+  .dish-scroll {
+    max-height: none;
+    overflow: auto;
+  }
+
+  .dish-remark-dock {
+    position: static;
+    bottom: auto;
+  }
+
+  .pane-head {
+    margin-bottom: 12px;
+  }
+
+  .dish-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dish-button {
+    min-height: 72px;
+    padding: 10px;
+  }
+
+  .dish-button strong {
+    font-size: 15px;
+  }
+
+  .dish-button span,
+  .item-price,
+  .manage-dish span,
+  .group-foot strong {
+    font-size: 16px;
+  }
+
+  .remark-picker {
+    padding: 12px;
+  }
+
+  .remark-tags {
+    max-height: 94px;
+    overflow: auto;
+  }
+
+  .group-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .order-group {
+    min-height: 240px;
+  }
+
+  .bottom-nav {
+    padding-block: 8px calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .nav-button {
+    min-height: 48px;
+  }
+}
