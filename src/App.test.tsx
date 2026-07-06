@@ -23,6 +23,18 @@ describe("App", () => {
     expect(screen.getByText("全部合计 ￥28")).toBeInTheDocument();
   });
 
+  it("fills the top area without page title bars", () => {
+    render(<App />);
+
+    expect(screen.queryByRole("heading", { name: "平板点餐" })).not.toBeInTheDocument();
+    expect(document.querySelector(".topbar")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "管理" }));
+
+    expect(screen.queryByRole("heading", { name: "菜品管理" })).not.toBeInTheDocument();
+    expect(document.querySelector(".topbar")).not.toBeInTheDocument();
+  });
+
   it("switches to management and adds a new dish", () => {
     render(<App />);
 

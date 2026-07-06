@@ -72,17 +72,6 @@ export function OrderPage({
 
   return (
     <section className="page order-page">
-      <header className="topbar">
-        <div>
-          <h1>平板点餐</h1>
-          <p>{activeGroup ? `当前加菜目标：第 ${activeGroup.number} 组` : "点击菜品自动创建第 1 组"}</p>
-        </div>
-        <div className="summary">
-          <strong>{state.orderGroups.length} 组</strong>
-          <span>全部合计 {formatPrice(getGrandTotal(state.orderGroups))}</span>
-        </div>
-      </header>
-
       <div className="order-layout">
         <aside className="dish-pane">
           <div className="dish-scroll">
@@ -170,6 +159,13 @@ export function OrderPage({
         </aside>
 
         <section className="groups-pane">
+          <div className="groups-summary">
+            <div>
+              <strong>{state.orderGroups.length} 组</strong>
+              <span>{activeGroup ? `加菜目标：第 ${activeGroup.number} 组` : "点击菜品自动创建第 1 组"}</span>
+            </div>
+            <strong>全部合计 {formatPrice(getGrandTotal(state.orderGroups))}</strong>
+          </div>
           {state.orderGroups.length === 0 ? (
             <EmptyState title="暂无菜单" description="点击左侧菜品即可自动创建第 1 组。" />
           ) : (

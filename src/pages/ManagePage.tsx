@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { CATEGORY_LABELS, CATEGORY_ORDER } from "../constants";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { addDish, addRemark, deleteDish, deleteRemark, updateDish } from "../state";
@@ -32,13 +32,6 @@ export function ManagePage({ state, setState }: ManagePageProps) {
   const [remarkInput, setRemarkInput] = useState("");
   const [remarkError, setRemarkError] = useState("");
   const [deletingDish, setDeletingDish] = useState<Dish | null>(null);
-  const dishCount = state.dishes.length;
-  const averagePrice = useMemo(() => {
-    if (state.dishes.length === 0) {
-      return 0;
-    }
-    return state.dishes.reduce((sum, dish) => sum + dish.price, 0) / state.dishes.length;
-  }, [state.dishes]);
 
   const submit = () => {
     const price = Number(form.price);
@@ -87,17 +80,6 @@ export function ManagePage({ state, setState }: ManagePageProps) {
 
   return (
     <section className="page manage-page">
-      <header className="topbar">
-        <div>
-          <h1>菜品管理</h1>
-          <p>热菜、凉菜、饮料</p>
-        </div>
-        <div className="summary">
-          <strong>{dishCount} 道</strong>
-          <span>平均价格 {formatPrice(averagePrice)}</span>
-        </div>
-      </header>
-
       <div className="manage-layout">
         <aside className="manage-side">
           <section className="form-card">
