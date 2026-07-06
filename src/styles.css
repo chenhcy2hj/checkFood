@@ -999,3 +999,158 @@ button:disabled {
     min-height: 48px;
   }
 }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .topbar {
+    height: 52px;
+    padding: 5px 12px;
+  }
+
+  .topbar h1 {
+    font-size: 18px;
+  }
+
+  .topbar p {
+    display: none;
+  }
+
+  .summary {
+    min-width: 136px;
+    padding: 5px 8px;
+  }
+
+  .summary strong {
+    font-size: 15px;
+  }
+
+  .summary span {
+    margin-top: 0;
+    font-size: 11px;
+  }
+
+  .dish-pane,
+  .groups-pane {
+    padding: 10px;
+  }
+
+  .dish-pane {
+    gap: 8px;
+  }
+
+  .pane-head {
+    margin-bottom: 8px;
+  }
+
+  .pane-head h2 {
+    font-size: 18px;
+  }
+
+  .button {
+    min-height: 36px;
+    padding-inline: 10px;
+    font-size: 13px;
+  }
+
+  .mini-button {
+    min-height: 30px;
+    padding-inline: 8px;
+    font-size: 12px;
+  }
+
+  .dish-grid {
+    gap: 8px;
+  }
+
+  .dish-button {
+    min-height: 60px;
+    padding: 8px;
+  }
+
+  .dish-button strong {
+    font-size: 14px;
+  }
+
+  .dish-button span,
+  .item-price,
+  .manage-dish span,
+  .group-foot strong {
+    font-size: 15px;
+  }
+
+  .remark-picker {
+    padding: 8px;
+  }
+
+  .remark-placeholder {
+    min-height: 54px;
+    padding: 8px 10px;
+  }
+
+  .remark-head {
+    margin-bottom: 6px;
+  }
+
+  .remark-head h2 {
+    font-size: 14px;
+  }
+
+  .text-button {
+    min-height: 28px;
+    padding-inline: 8px;
+    font-size: 12px;
+  }
+
+  .remark-tags {
+    max-height: 64px;
+    gap: 6px;
+    margin-bottom: 8px;
+    overflow: auto;
+  }
+
+  .remark-tag {
+    min-height: 28px;
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  .order-group {
+    min-height: 210px;
+  }
+
+  .group-head {
+    padding: 10px;
+  }
+
+  .group-head h2 {
+    font-size: 18px;
+  }
+
+  .order-items {
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .order-item {
+    min-height: 44px;
+    padding: 8px;
+  }
+
+  .item-name-button {
+    font-size: 14px;
+  }
+
+  .group-foot {
+    padding: 10px;
+  }
+
+  .bottom-nav {
+    gap: 8px;
+    padding-block: 4px calc(4px + env(safe-area-inset-bottom));
+    padding-inline: 12px;
+  }
+
+  .nav-button {
+    min-height: 38px;
+    font-size: 14px;
+  }
+}
